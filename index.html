@@ -1,175 +1,115 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GitHub Learning Portal</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI Training Portal</title>
 
-```
-<!-- Tailwind CSS -->
-<script src="https://cdn.tailwindcss.com"></script>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
 
-<!-- Supabase -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<style>
-    body{
-        font-family: Inter, system-ui, sans-serif;
-    }
-</style>
-```
+  <!-- Supabase JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 </head>
 
 <body class="bg-slate-950 text-white min-h-screen">
 
-```
-<!-- Header -->
-<header class="bg-gradient-to-r from-slate-900 via-gray-900 to-black py-16">
-    <div class="max-w-7xl mx-auto px-6 text-center">
-        <h1 class="text-5xl md:text-6xl font-bold mb-4">
-            Welcome to GitHub
-        </h1>
+  <!-- HEADER -->
+  <header class="bg-gradient-to-r from-slate-900 via-gray-900 to-black py-14 text-center">
+    <h1 class="text-5xl font-bold">Welcome to AI Training Portal</h1>
+    <p class="text-slate-300 mt-3">Live data from Supabase</p>
+  </header>
 
-        <p class="text-slate-300 text-xl">
-            Learn GitHub, Git, HTML, Tailwind CSS and Modern Development Technologies
-        </p>
-    </div>
-</header>
+  <!-- CONTENT -->
+  <main class="max-w-7xl mx-auto px-6 py-10">
 
-<!-- Content -->
-<main class="max-w-7xl mx-auto px-6 py-12">
+    <div class="flex justify-between items-center mb-6">
+      <h2 class="text-3xl font-bold">Training Data</h2>
 
-    <div class="flex items-center justify-between mb-8">
-        <h2 class="text-3xl font-bold">
-            Training Catalog
-        </h2>
-
-        <button
-            onclick="loadTrainingData()"
-            class="bg-blue-600 hover:bg-blue-700 px-5 py-2 rounded-lg transition">
-            Refresh
-        </button>
+      <button onclick="loadData()"
+        class="bg-blue-600 px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+        Refresh
+      </button>
     </div>
 
-    <div id="loading" class="text-center text-slate-400 text-lg">
-        Loading training modules...
+    <div id="status" class="text-slate-400 mb-6">
+      Loading data...
     </div>
 
-    <div id="error" class="hidden text-center text-red-400 mb-6"></div>
+    <div id="cards" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
 
-    <div
-        id="training-container"
-        class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-    </div>
+  </main>
 
-</main>
+  <script>
+    // ✅ Supabase Config
+    const SUPABASE_URL = "https://gsdblteofsongnjdjhpc.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_u9dNq32zPDAFOO415PArvQ_ljzEEiaC";
 
-<script>
+    // ✅ IMPORTANT: use supabaseClient (NOT supabase)
+    const supabaseClient = window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_ANON_KEY
+    );
 
-    const SUPABASE_URL =
-        "https://gsdblteofsongnjdjhpc.supabase.co";
+    // Load data from Supabase
+    async function loadData() {
 
-    const SUPABASE_ANON_KEY =
-        "sb_publishable_u9dNq32zPDAFOO415PArvQ_ljzEEiaC";
+      const status = document.getElementById("status");
+      const cards = document.getElementById("cards");
 
-    const supabase =
-        window.supabase.createClient(
-            SUPABASE_URL,
-            SUPABASE_ANON_KEY
-        );
+      status.innerText = "Loading...";
+      cards.innerHTML = "";
 
-    async function loadTrainingData() {
+      const { data, error } = await supabaseClient
+        .from("trainingdata")
+        .select("*")
+        .order("id", { ascending: true });
 
-        const loading =
-            document.getElementById("loading");
+      if (error) {
+        status.innerText = "Error: " + error.message;
+        return;
+      }
 
-        const errorDiv =
-            document.getElementById("error");
+      if (!data || data.length === 0) {
+        status.innerText = "No data found";
+        return;
+      }
 
-        const container =
-            document.getElementById("training-container");
+      status.innerText = `Loaded ${data.length} records`;
 
-        loading.style.display = "block";
-        errorDiv.classList.add("hidden");
-        container.innerHTML = "";
+      data.forEach(item => {
+        const div = document.createElement("div");
 
-        try {
+        div.className =
+          "bg-slate-900 border border-slate-800 p-6 rounded-2xl hover:border-blue-500 transition";
 
-            const { data, error } = await supabase
-                .from("trainingdata")
-                .select("*")
-                .order("id", { ascending: true });
+        div.innerHTML = `
+          <span class="text-xs bg-blue-600 px-3 py-1 rounded-full">
+            ${item.tech || ""}
+          </span>
 
-            if (error) {
-                throw error;
-            }
+          <h3 class="text-xl font-bold mt-4">
+            ${item.title || ""}
+          </h3>
 
-            loading.style.display = "none";
+          <p class="text-slate-300 mt-2 mb-4">
+            ${item.desc || ""}
+          </p>
 
-            if (!data || data.length === 0) {
+          <a href="${item.link || "#"}" target="_blank"
+             class="text-blue-400 hover:underline">
+            Visit Link →
+          </a>
+        `;
 
-                container.innerHTML = `
-                    <div class="col-span-full text-center text-slate-400 text-xl">
-                        No training records found.
-                    </div>
-                `;
-
-                return;
-            }
-
-            data.forEach(item => {
-
-                const card = document.createElement("div");
-
-                card.className =
-                    "bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl hover:border-blue-500 hover:-translate-y-1 transition duration-300";
-
-                card.innerHTML = `
-                    <div class="mb-4">
-                        <span class="bg-blue-600 text-white px-3 py-1 rounded-full text-sm">
-                            ${item.tech || ''}
-                        </span>
-                    </div>
-
-                    <h3 class="text-2xl font-bold mb-3">
-                        ${item.title || ''}
-                    </h3>
-
-                    <p class="text-slate-300 mb-6">
-                        ${item.desc || ''}
-                    </p>
-
-                    <a
-                        href="${item.link || '#'}"
-                        target="_blank"
-                        class="inline-block bg-white text-slate-900 px-5 py-2 rounded-lg font-semibold hover:bg-blue-500 hover:text-white transition">
-                        Learn More
-                    </a>
-                `;
-
-                container.appendChild(card);
-            });
-
-        }
-        catch(err) {
-
-            loading.style.display = "none";
-
-            errorDiv.classList.remove("hidden");
-
-            errorDiv.innerHTML =
-                "Error loading data: " + err.message;
-        }
+        cards.appendChild(div);
+      });
     }
 
-    loadTrainingData();
-
-    setInterval(loadTrainingData, 30000);
-
-</script>
-```
+    // Auto load
+    loadData();
+  </script>
 
 </body>
 </html>
