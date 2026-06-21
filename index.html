@@ -1,12 +1,16 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome to GitHub</title>
+    <title>GitHub Training Portal</title>
 
-    <!-- Tailwind CSS CDN -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
         body {
@@ -14,21 +18,130 @@
         }
     </style>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-black flex items-center justify-center">
 
-    <div class="text-center p-10 bg-white/10 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/20">
-        <h1 class="text-5xl md:text-7xl font-extrabold text-white mb-4">
-            Welcome to GitHub
-        </h1>
+<body class="bg-slate-950 text-white min-h-screen">
 
-        <p class="text-slate-300 text-lg md:text-xl">
-            Your code, your projects, your future.
-        </p>
+    <!-- Hero -->
+    <section class="bg-gradient-to-r from-slate-900 via-gray-900 to-black py-16">
+        <div class="max-w-7xl mx-auto px-6 text-center">
+            <h1 class="text-5xl font-bold mb-4">
+                Welcome to GitHub
+            </h1>
 
-        <button class="mt-8 px-8 py-3 bg-white text-slate-900 font-semibold rounded-xl hover:scale-105 transition-transform duration-300 shadow-lg">
-            Get Started
-        </button>
-    </div>
+            <p class="text-slate-300 text-xl">
+                Learn GitHub, Git, Web Development and Modern Technologies
+            </p>
+        </div>
+    </section>
+
+    <!-- Training Data -->
+    <section class="max-w-7xl mx-auto px-6 py-12">
+        <h2 class="text-3xl font-bold mb-8">
+            Available Training Modules
+        </h2>
+
+        <div id="loading" class="text-slate-400">
+            Loading training data...
+        </div>
+
+        <div
+            id="training-container"
+            class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        </div>
+    </section>
+
+    <script>
+
+        const supabaseUrl =
+            'https://gsdblteofsongnjdjhpc.supabase.co';
+
+        const supabaseKey =
+            'sb_publishable_u9dNq32zPDAFOO415PArvQ_ljzEEiaC';
+
+        const supabase =
+            window.supabase.createClient(
+                supabaseUrl,
+                supabaseKey
+            );
+
+        async function loadTrainingData() {
+
+            try {
+
+                const { data, error } = await supabase
+                    .from('trainingdata')
+                    .select('*')
+                    .order('id');
+
+                if (error) {
+                    throw error;
+                }
+
+                document.getElementById('loading').style.display = 'none';
+
+                const container =
+                    document.getElementById('training-container');
+
+                if (!data || data.length === 0) {
+
+                    container.innerHTML = `
+                        <div class="col-span-full text-center text-slate-400">
+                            No training data found.
+                        </div>
+                    `;
+
+                    return;
+                }
+
+                data.forEach(item => {
+
+                    const card = document.createElement('div');
+
+                    card.className =
+                        'bg-slate-900 border border-slate-800 rounded-2xl p-6 hover:border-blue-500 hover:scale-105 transition duration-300 shadow-xl';
+
+                    card.innerHTML = `
+                        <div class="mb-4">
+                            <span class="bg-blue-600 text-white text-xs px-3 py-1 rounded-full">
+                                ${item.tech}
+                            </span>
+                        </div>
+
+                        <h3 class="text-2xl font-bold mb-3">
+                            ${item.title}
+                        </h3>
+
+                        <p class="text-slate-300 mb-6">
+                            ${item.desc}
+                        </p>
+
+                        <a
+                            href="${item.link}"
+                            target="_blank"
+                            class="inline-block bg-white text-slate-900 px-5 py-2 rounded-lg font-semibold hover:bg-blue-500 hover:text-white transition"
+                        >
+                            Learn More
+                        </a>
+                    `;
+
+                    container.appendChild(card);
+                });
+
+            } catch (err) {
+
+                document.getElementById('loading').innerHTML = `
+                    <div class="text-red-400">
+                        Error loading data:
+                        ${err.message}
+                    </div>
+                `;
+            }
+        }
+
+        loadTrainingData();
+
+    </script>
 
 </body>
 </html>
+```
