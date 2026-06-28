@@ -1,93 +1,67 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+// ✅ Supabase Config
+const SUPABASE_URL = "https://gsdblteofsongnjdjhpc.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_u9dNq32zPDAFOO415PArvQ_ljzEEiaC";
 
-    <title>Training Portal</title>
+// Initialize Supabase Client
+const supabaseClient = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
+);
 
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+// Load data from Supabase
+async function loadData() {
+  const status = document.getElementById("status");
+  const cards = document.getElementById("cards");
 
-    <!-- Your shared stylesheet -->
-    <link rel="stylesheet" href="css/style.css">
-</head>
+  status.innerText = "Loading data...";
+  cards.innerHTML = "";
 
-<body class="bg-slate-900 text-white min-h-screen">
+  const { data, error } = await supabaseClient
+    .from("trainingdata")
+    .select("*")
+    .order("id", { ascending: true });
 
-    <!-- Header -->
-    <header class="bg-slate-800 shadow-md">
-        <div class="max-w-7xl mx-auto px-6 py-5 flex justify-between items-center">
+  if (error) {
+    status.innerText = "Error: " + error.message;
+    return;
+  }
 
-            <h1 class="text-3xl font-bold">
-                Training Portal
-            </h1>
+  if (!data || data.length === 0) {
+    status.innerText = "No records found";
+    return;
+  }
 
-            <nav class="space-x-6">
-                <a href="index.html" class="hover:text-blue-400">Home</a>
-                <a href="about.html" class="hover:text-blue-400">About</a>
-                <a href="contact.html" class="hover:text-blue-400">Contact</a>
-            </nav>
+  status.innerText = `Loaded ${data.length} records successfully`;
 
-        </div>
-    </header>
+  data.forEach(item => {
+    const div = document.createElement("div");
+    div.className = "bg-slate-900 border border-slate-800 p-6 rounded-2xl hover:border-blue-500 hover:shadow-xl hover:shadow-blue-950/20 transition-all duration-300 flex flex-col justify-between";
 
-    <!-- Main Content -->
-    <main class="max-w-7xl mx-auto px-6 py-10">
+    div.innerHTML = `
+      <div>
+        <span class="text-xs bg-blue-950 text-blue-400 border border-blue-800/50 px-3 py-1 rounded-full font-medium">
+          ${item.tech || "General"}
+        </span>
 
-        <!-- Title + Refresh Button -->
-        <div class="flex justify-between items-center mb-6">
+        <h3 class="text-xl font-bold mt-4 text-slate-100">
+          ${item.title || "Untitled Project"}
+        </h3>
 
-            <h2 class="text-3xl font-bold">
-                Training Data
-            </h2>
+        <p class="text-slate-400 mt-2 mb-6 text-sm leading-relaxed">
+          ${item.desc || "No description provided."}
+        </p>
+      </div>
 
-            <button
-                onclick="loadData()"
-                class="bg-blue-600 px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+      <a href="${item.link || "#"}" target="_blank"
+         class="text-sm text-blue-400 font-semibold hover:text-blue-300 flex items-center mt-auto group">
+        Visit Link 
+        <span class="transform group-hover:translate-x-1 transition-transform ml-1">→</span>
+      </a>
+    `;
 
-                Refresh
+    cards.appendChild(div);
+  });
+}
 
-            </button>
-
-        </div>
-
-        <!-- Status -->
-        <div id="status" class="text-slate-400 mb-6">
-            Ready.
-        </div>
-
-        <!-- Training Cards -->
-        <div id="cards" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-
-            <!-- Sample Card -->
-            <div class="bg-slate-800 rounded-xl p-6 shadow-lg">
-
-                <h3 class="text-xl font-semibold mb-2">
-                    Sample Training
-                </h3>
-
-                <p class="text-slate-300">
-                    Your training cards will appear here once loaded by JavaScript.
-                </p>
-
-            </div>
-
-        </div>
-
-    </main>
-
-    <!-- Footer -->
-    <footer class="bg-slate-800 mt-12">
-        <div class="max-w-7xl mx-auto px-6 py-5 text-center text-slate-400">
-
-            © 2026 Training Portal
-
-        </div>
-    </footer>
-
-    <!-- Shared JavaScript -->
-    <script src="js/app.js"></script>
-
-</body>
-</html>
+// Auto-load records when DOM is ready
+document.addEventListener("DOMContentLoaded", loadData);
