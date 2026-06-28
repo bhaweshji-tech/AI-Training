@@ -1,67 +1,65 @@
-// ✅ Supabase Config
-const SUPABASE_URL = "https://gsdblteofsongnjdjhpc.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_u9dNq32zPDAFOO415PArvQ_ljzEEiaC";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI Training Portal</title>
 
-// Initialize Supabase Client
-const supabaseClient = window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_ANON_KEY
-);
+  <script src="https://cdn.tailwindcss.com"></script>
 
-// Load data from Supabase
-async function loadData() {
-  const status = document.getElementById("status");
-  const cards = document.getElementById("cards");
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  status.innerText = "Loading data...";
-  cards.innerHTML = "";
+  <script src="js/app.js" defer></script>
+</head>
 
-  const { data, error } = await supabaseClient
-    .from("trainingdata")
-    .select("*")
-    .order("id", { ascending: true });
+<body class="bg-slate-950 text-white min-h-screen flex flex-col justify-between">
 
-  if (error) {
-    status.innerText = "Error: " + error.message;
-    return;
-  }
-
-  if (!data || data.length === 0) {
-    status.innerText = "No records found";
-    return;
-  }
-
-  status.innerText = `Loaded ${data.length} records successfully`;
-
-  data.forEach(item => {
-    const div = document.createElement("div");
-    div.className = "bg-slate-900 border border-slate-800 p-6 rounded-2xl hover:border-blue-500 hover:shadow-xl hover:shadow-blue-950/20 transition-all duration-300 flex flex-col justify-between";
-
-    div.innerHTML = `
-      <div>
-        <span class="text-xs bg-blue-950 text-blue-400 border border-blue-800/50 px-3 py-1 rounded-full font-medium">
-          ${item.tech || "General"}
+  <header class="bg-gradient-to-r from-slate-900 via-gray-900 to-black sticky top-0 z-50 border-b border-slate-800">
+    <nav class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+      <div class="flex items-center space-x-2">
+        <span class="text-xl font-bold bg-gradient-to-r from-blue-400 to-indigo-500 bg-clip-text text-transparent">
+          AI-Training
         </span>
+      </div>
+      <div class="flex space-x-6 text-sm font-medium text-slate-300">
+        <a href="index.html" class="text-blue-400 hover:text-white transition">Home</a>
+        <a href="about.html" class="hover:text-blue-400 transition">About</a>
+        <a href="contact.html" class="hover:text-blue-400 transition">Contact</a>
+        <a href="github-info.html" class="hover:text-blue-400 transition">GitHub Info</a>
+      </div>
+    </nav>
 
-        <h3 class="text-xl font-bold mt-4 text-slate-100">
-          ${item.title || "Untitled Project"}
-        </h3>
+    <div class="py-14 text-center">
+      <h1 class="text-5xl font-bold tracking-tight">Welcome to AI Training Portal</h1>
+      <p class="text-slate-400 mt-3 max-w-md mx-auto text-sm md:text-base">
+        Streamlining machine learning models and training resources with live data from Supabase.
+      </p>
+    </div>
+  </header>
 
-        <p class="text-slate-400 mt-2 mb-6 text-sm leading-relaxed">
-          ${item.desc || "No description provided."}
-        </p>
+  <main class="max-w-7xl mx-auto px-6 py-10 flex-grow w-full">
+
+    <div class="flex justify-between items-center mb-8">
+      <div>
+        <h2 class="text-3xl font-bold">Training Data</h2>
+        <div id="status" class="text-xs text-slate-500 mt-1 uppercase tracking-wider">
+          Initializing connection...
+        </div>
       </div>
 
-      <a href="${item.link || "#"}" target="_blank"
-         class="text-sm text-blue-400 font-semibold hover:text-blue-300 flex items-center mt-auto group">
-        Visit Link 
-        <span class="transform group-hover:translate-x-1 transition-transform ml-1">→</span>
-      </a>
-    `;
+      <button onclick="loadData()"
+        class="bg-blue-600 px-5 py-2.5 rounded-xl font-medium hover:bg-blue-700 active:scale-95 transition-all shadow-lg shadow-blue-950">
+        Refresh Data
+      </button>
+    </div>
 
-    cards.appendChild(div);
-  });
-}
+    <div id="cards" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
 
-// Auto-load records when DOM is ready
-document.addEventListener("DOMContentLoaded", loadData);
+  </main>
+
+  <footer class="border-t border-slate-900 bg-slate-950 py-6 text-center text-sm text-slate-600">
+    &copy; 2026 AI-Training Portal. All rights reserved.
+  </footer>
+
+</body>
+</html>
