@@ -23,7 +23,7 @@ const SUPABASE_ANON_KEY = "sb_publishable_u9dNq32zPDAFOO415PArvQ_ljzEEiaC";
 export const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // 🔴 CONFIGURATION: Replace this with your exact Gmail address to access the Admin Panel
-export const ADMIN_EMAIL = "your-admin-email@gmail.com";
+export const ADMIN_EMAIL = "bhaweshji@gmail.com";
 
 // MODULE 2: Global UI Component Injector (Header & Footer)
 export function injectLayout(currentUser) {
