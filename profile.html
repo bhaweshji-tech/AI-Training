@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Profile Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-slate-950 text-white min-h-screen flex flex-col justify-between">
+
+  <header id="shared-header" class="bg-slate-900 border-b border-slate-800 sticky top-0 z-50"></header>
+
+  <main class="max-w-4xl mx-auto px-6 py-12 flex-grow w-full">
+    <div class="bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 p-8 rounded-2xl flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6">
+      <img id="user-avatar" src="https://via.placeholder.com/150" class="w-20 h-20 rounded-full border-2 border-blue-500 shadow-xl shadow-blue-950">
+      <div class="text-center sm:text-left">
+        <h2 id="user-display-name" class="text-2xl font-bold">Loading Account Name...</h2>
+        <p id="user-display-email" class="text-slate-400 text-sm font-mono"></p>
+        <span class="inline-block mt-2 text-[10px] uppercase font-bold tracking-widest bg-blue-950 text-blue-400 border border-blue-900/60 px-2.5 py-0.5 rounded-full">Portal Visitor</span>
+      </div>
+    </div>
+
+    <div class="mt-12">
+      <h3 class="text-xl font-bold mb-4">Your Authored Reviews</h3>
+      <div id="profile-status" class="text-xs text-blue-400 font-mono mb-4">Processing profiles...</div>
+      <div id="my-reviews-stack" class="space-y-4"></div>
+    </div>
+  </main>
+
+  <footer id="shared-footer" class="border-t border-slate-900 bg-slate-950 py-6"></footer>
+
+  <script type="module">
+    import { auth, supabaseClient, injectLayout, ADMIN_EMAIL } from "./js/auth.js";
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        window.location.href = "index.html"; // Redirect unauthenticated users
+        return;
+      }
+      if (user.email === ADMIN_EMAIL) {
+        window.location.href = "admin.html"; // Reroute owner to proper controls
+        return;
+      }
+
+      injectLayout(user);
+      renderProfileDetails(user);
+    });
+
+    async function renderProfileDetails(user) {
+      document.getElementById("user-avatar").src = user.photoURL;
+      document.getElementById("user-display-name").innerText = user.displayName;
+      document.getElementById("user-display-email").innerText = user.email;
+
+      const stack = document.getElementById("my-reviews-stack");
+      const pStatus = document.getElementById("profile-status");
+      stack.innerHTML = "";
+
+      // Fetch reviews written by this user email
+      const { data: myReviews, error } = await supabaseClient
+        .from("reviews")
+        .select(`*, trainingdata(title)`)
+        .eq("user_email", user.email)
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        pStatus.innerText = "Failed to synchronize reviews: " + error.message;
+        return;
+      }
+
+      if (!myReviews || myReviews.length === 0) {
+        pStatus.innerText = "";
+        stack.innerHTML = `<p class="text-slate-500 italic text-sm bg-slate-900/40 p-4 border border-slate-900 rounded-xl">You have not posted any course feedback yet.</p>`;
+        return;
+      }
+
+      pStatus.innerText = `Found ${myReviews.length} submitted reviews`;
+
+      myReviews.forEach(rev => {
+        const item = document.createElement("div");
+        item.className = "bg-slate-900 border border-slate-800/80 p-5 rounded-xl flex flex-col justify-between";
+        item.innerHTML = `
+          <div>
+            <span class="text-[10px] bg-slate-950 border border-slate-800 text-slate-400 px-2 py-0.5 rounded font-mono">Course: ${rev.trainingdata?.title || 'Unknown Asset'}</span>
+            <p class="text-slate-200 italic text-sm mt-3">"${rev.review_text}"</p>
+          </div>
+          <div class="mt-4 flex justify-between items-center text-[11px] text-slate-500">
+            <span>Posted on: ${new Date(rev.created_at).toLocaleDateString()}</span>
+            <button data-rev-id="${rev.id}" class="btn-del-rev text-red-400 hover:underline">Delete Review</button>
+          </div>
+        `;
+        stack.appendChild(item);
+      });
+
+      // Add functionality to delete reviews from profile
+      document.querySelectorAll(".btn-del-rev").forEach(btn => {
+        btn.addEventListener("click", async (e) => {
+          if (!confirm("Are you sure you want to remove this review?")) return;
+          const rid = e.target.getAttribute("data-rev-id");
+          const { error: delErr } = await supabaseClient.from("reviews").delete().eq("id", rid);
+          if (delErr) alert(delErr.message);
+          else renderProfileDetails(user);
+        });
+      });
+    }
+  </script>
+</body>
+</html>
