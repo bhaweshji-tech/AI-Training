@@ -59,12 +59,16 @@
     import { auth, supabaseClient, injectLayout, ADMIN_EMAIL } from "./js/auth.js";
     import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
+    // Global variable tracking our active authenticated session email
+    let currentUserEmail = "";
+
     onAuthStateChanged(auth, (user) => {
       if (!user || user.email !== ADMIN_EMAIL) {
         // Kick out immediately if user is not the explicit Admin owner
         window.location.href = "index.html"; 
         return;
       }
+      currentUserEmail = user.email; // Safely save the verified Firebase email locally
       injectLayout(user);
       loadAdminWorkspace();
     });
@@ -149,7 +153,14 @@
 
       if(!title) { alert("Title field required!"); return; }
 
-      const payload = { tech, title, desc, link };
+      // Append your authenticated Firebase email directly to the object row
+      const payload = { 
+        tech: tech, 
+        title: title, 
+        desc: desc, 
+        link: link,
+        created_by: currentUserEmail 
+      };
 
       let operation;
       if (id) {
@@ -159,14 +170,23 @@
       }
 
       operation.then(({ error }) => {
-        if(error) alert(error.message);
+        if(error) alert("Database Policy Blocked: " + error.message);
         else { toggleForm(); loadAdminWorkspace(); }
       });
     }
 
     window.deleteCourse = function(id) {
       if(!confirm("Permanently erase this course mapping along with its connected review chains?")) return;
-      supabaseClient.from("trainingdata").delete().eq("id", id).then(() => loadAdminWorkspace());
+      
+      // Target explicitly by ID and confirm ownership identity parameter
+      supabaseClient.from("trainingdata")
+        .delete()
+        .eq("id", id)
+        .eq("created_by", currentUserEmail)
+        .then(({ error }) => {
+          if (error) alert("Database Error: " + error.message);
+          else loadAdminWorkspace();
+        });
     }
 
     window.deleteReview = function(id) {
