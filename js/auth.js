@@ -1,8 +1,7 @@
-// MODULE 1: Firebase & Supabase Initializations
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getAuth, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-// 🔴 REPLACE THESE WITH YOUR EXACT FIREBASE CONFIG DETAILS FROM STEP 1
+// 🔴 YOUR FIREBASE CONFIG
 const firebaseConfig = {
   apiKey: "AIzaSyBnDBFx2UXRVIl-XnXZojPq00qIZuFX830",
   authDomain: "myaitraining-4326a.firebaseapp.com",
@@ -12,22 +11,20 @@ const firebaseConfig = {
   appId: "1:451753280099:web:8f0d5a873875bdbe4e2e56",
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
-// Initialize Supabase Client globally on window object
-const SUPABASE_URL = "https://gsdblteofsongnjdjhpc.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_u9dNq32zPDAFOO415PArvQ_ljzEEiaC";
-export const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-// 🔴 CONFIGURATION: Replace this with your exact Gmail address to access the Admin Panel
+// 🔴 YOUR ADMIN EMAIL
 export const ADMIN_EMAIL = "bhaweshji@gmail.com";
 
-// MODULE 2: Global UI Component Injector (Header & Footer)
+const SUPABASE_URL = "https://gsdblteofsongnjdjhpc.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_u9dNq32zPDAFOO415PArvQ_ljzEEiaC";
+
+// Single standard client used by everyone
+export const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
 export function injectLayout(currentUser) {
-  // Inject Shared Header
   const headerHTML = `
     <nav class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
       <div class="flex items-center space-x-2">
@@ -55,27 +52,13 @@ export function injectLayout(currentUser) {
   const headerEl = document.getElementById("shared-header");
   if (headerEl) headerEl.innerHTML = headerHTML;
 
-  // Inject Shared Footer
-  const footerHTML = `
-    <div class="max-w-7xl mx-auto px-6 text-center text-sm text-slate-600">
-      &copy; 2026 AI-Training Portal. All rights reserved.
-    </div>
-  `;
+  const footerHTML = `<div class="max-w-7xl mx-auto px-6 text-center text-sm text-slate-600">&copy; 2026 AI-Training Portal. All rights reserved.</div>`;
   const footerEl = document.getElementById("shared-footer");
   if (footerEl) footerEl.innerHTML = footerHTML;
 
-  // Setup Global Authentication Button Listeners
   const loginBtn = document.getElementById("btn-login");
-  if (loginBtn) {
-    loginBtn.addEventListener("click", () => {
-      signInWithPopup(auth, provider).catch(err => alert("Auth Error: " + err.message));
-    });
-  }
+  if (loginBtn) loginBtn.addEventListener("click", () => signInWithPopup(auth, provider).catch(err => alert(err.message)));
 
   const logoutBtn = document.getElementById("btn-logout");
-  if (logoutBtn) {
-    logoutBtn.addEventListener("click", () => {
-      signOut(auth).then(() => { window.location.href = "index.html"; });
-    });
-  }
+  if (logoutBtn) logoutBtn.addEventListener("click", () => signOut(auth).then(() => { window.location.href = "index.html"; }));
 }
