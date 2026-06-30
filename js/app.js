@@ -15,7 +15,7 @@ onAuthStateChanged(auth, (user) => {
 
 /**
  * Fetches course data and user reviews from Supabase, then dynamically builds the UI 
- * using the precise classes from the Stitch Developer Edition UI framework.
+ * using standard Tailwind classes matching the Developer Edition design.
  */
 async function loadDashboardData() {
   const statusEl = document.getElementById("status");
@@ -50,59 +50,58 @@ async function loadDashboardData() {
 
   if (statusEl) statusEl.innerText = `ACTIVE SYSTEMS: ${courses.length} CHANNELS`;
 
-  // 3. Dynamically build each card structure using Developer Edition specifications
-  courses.forEach((course, index) => {
+  // 3. Dynamically build each card structure using standard Tailwind layout classes
+  courses.forEach((course) => {
     const courseReviews = reviews ? reviews.filter(r => r.course_id === course.id) : [];
     const cardElement = document.createElement("div");
     
-    // Stitch entrance delay scaling index loop rule
-    const delayIndex = (index % 6) + 1;
-    cardElement.className = `glass-panel rounded-xl shadow-2xl flex flex-col overflow-hidden group cursor-pointer card-hover animate-fade-in-up entrance-delayed-${delayIndex}`;
+    // Using native Tailwind grid layouts and card-hover transitions from style.css
+    cardElement.className = "glass-panel rounded-xl shadow-2xl flex flex-col overflow-hidden group cursor-pointer card-hover text-left";
 
     // Process review items sub-elements layout markup
     let reviewsHTML = courseReviews.map(r => `
       <div class="bg-black/40 p-3 rounded border border-white/5 text-xs text-slate-300 mt-2">
         <div class="flex items-center space-x-2 mb-1">
-          <img src="${r.user_photo || 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=150&h=150'}" class="w-4 h-4 rounded-full border border-primary-container/40">
+          <img src="${r.user_photo || 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=150&h=150'}" class="w-4 h-4 rounded-full border border-rose-600/40">
           <span class="font-bold text-slate-200">${r.user_name}</span>
         </div>
         <p class="italic text-white/70">"${r.review_text}"</p>
       </div>
     `).join("");
 
-    // Populate full inner card schema mapping structural references cleanly
+    // Populate full inner card schema mapping standard utility structures
     cardElement.innerHTML = `
-      <div class="p-lg flex-grow flex flex-col">
-        <div class="flex justify-between items-start mb-md">
-          <span class="px-sm py-1 bg-primary-container text-white font-label-sm rounded tech-tag-glow uppercase tracking-widest font-bold text-[12px]">
+      <div class="p-6 flex-grow flex flex-col">
+        <div class="flex justify-between items-start mb-4">
+          <span class="px-2 py-1 bg-rose-600 text-white text-[10px] rounded tracking-widest font-bold uppercase shadow-[0_0_10px_rgba(225,29,72,0.4)]">
             ${course.tech || "GENERAL"}
           </span>
-          <button class="text-white/40 hover:text-primary transition-colors">
+          <button class="text-white/40 hover:text-rose-400 transition-colors">
             <span class="material-symbols-outlined">bookmark_add</span>
           </button>
         </div>
         
-        <h3 class="font-headline-md text-headline-md text-white mb-md font-bold group-hover:text-primary transition-all duration-300">
+        <h3 class="text-xl font-bold font-[Geist] text-white mb-4 group-hover:text-rose-400 transition-all duration-300 uppercase tracking-tight">
           ${course.title || "UNTITLED PIPELINE"}
         </h3>
         
-        <div class="p-4 rounded bg-[#2a1b1b] border border-white/5 mb-4">
-          <p class="font-body-md text-body-md text-white line-clamp-3">
+        <div class="p-4 rounded bg-[#2a1b1b]/60 border border-white/5 mb-4">
+          <p class="text-sm font-[Inter] text-white/90 leading-relaxed line-clamp-3">
             ${course.desc || "No calibration metrics provided for this network module."}
           </p>
         </div>
 
-        <div class="mt-auto border-t border-white/5 pt-4">
-          <span class="font-label-sm text-[10px] text-white/40 font-bold uppercase tracking-widest">Diagnostic Logs (${courseReviews.length})</span>
+        <div class="mt-4 border-t border-white/5 pt-4">
+          <span class="text-[10px] font-bold font-[Geist] tracking-widest text-white/40 uppercase">Diagnostic Logs (${courseReviews.length})</span>
           <div class="space-y-1 max-h-32 overflow-y-auto mt-2 pr-1 custom-scrollbar">
-            ${reviewsHTML || '<p class="text-xs text-white/40 italic">No logs submitted.</p>'}
+            ${reviewsHTML || '<p class="text-xs text-white/30 italic">No logs submitted.</p>'}
           </div>
         </div>
       </div>
 
-      <div class="p-md bg-primary-container flex flex-col gap-sm mt-auto">
+      <div class="p-4 bg-rose-600 flex flex-col gap-3 mt-auto">
         <div class="flex items-center justify-between">
-          <div class="flex items-center gap-xs">
+          <div class="flex items-center gap-1">
             <div class="flex text-[16px] text-white">
               <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">bolt</span>
               <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">bolt</span>
@@ -111,17 +110,17 @@ async function loadDashboardData() {
               <span class="material-symbols-outlined">bolt</span>
             </div>
           </div>
-          <a href="${course.link || "#"}" target="_blank" class="font-label-md font-bold group-hover:translate-x-1 transition-transform uppercase tracking-widest text-white flex items-center gap-xs">
+          <a href="${course.link || "#"}" target="_blank" class="text-xs font-bold font-[Geist] group-hover:translate-x-1 transition-transform uppercase tracking-widest text-white flex items-center gap-1">
             View <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
           </a>
         </div>
 
         ${globalUser ? `
-          <div class="pt-2 border-t border-white/10 mt-1">
-            <div class="flex gap-sm">
+          <div class="pt-2 border-t border-white/20 mt-1">
+            <div class="flex gap-2">
               <input type="text" id="input-${course.id}" placeholder="Append diagnostic entry..." 
-                     class="bg-black/40 border border-white/10 text-xs rounded px-3 py-1.5 flex-grow focus:outline-none focus:border-white text-white placeholder-white/30">
-              <button data-course-id="${course.id}" class="btn-submit-review px-3 py-1.5 bg-black/40 hover:bg-black/60 text-white font-label-sm text-[11px] rounded uppercase tracking-widest font-bold border border-white/10 transition-colors">
+                     class="bg-black/40 border border-white/10 text-xs rounded px-3 py-1.5 flex-grow focus:outline-none focus:border-white text-white placeholder-white/40">
+              <button data-course-id="${course.id}" class="btn-submit-review px-3 py-1.5 bg-black/40 hover:bg-black/60 text-white text-xs font-bold font-[Geist] rounded uppercase tracking-widest border border-white/10 transition-colors">
                 Post
               </button>
             </div>
@@ -163,7 +162,7 @@ async function loadDashboardData() {
 
 /**
  * ============================================================================
- * BACKGROUND GL ENGINE: INITIALIZE STITCH EMITTED PARTICLES SHADER MOCK ENGINE
+ * BACKGROUND GL ENGINE: INITIALIZE STITCH EMITTED PARTICLES SHADER ENGINE
  * ============================================================================
  */
 function initBackgroundEngine() {
@@ -279,5 +278,5 @@ function initBackgroundEngine() {
   requestAnimationFrame(render);
 }
 
-// Fire up the background canvas animation loop when DOM has structured
+// Initialize layout context on page mount
 document.addEventListener("DOMContentLoaded", initBackgroundEngine);
