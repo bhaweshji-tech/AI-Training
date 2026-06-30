@@ -1,16 +1,22 @@
 :root {
-    /* Baseline fallback values in case connection lags */
+    /* Safe fallback constraints */
+    --font-family: 'Geist', 'Inter', sans-serif;
+    --font-size-base: 14px;
+    --font-size-heading: 20px;
+    --card-max-width: 100%;
+    --card-padding: 24px;
     --color-primary: #e11d48;
     --color-background: #0b1326;
     --color-surface: rgba(15, 23, 42, 0.4);
 }
 
 body {
-    font-family: "Geist", "Inter", sans-serif;
+    font-family: var(--font-family);
+    font-size: var(--font-size-base);
     background-color: var(--color-background);
     color: #dae2fd;
     overflow-x: hidden;
-    transition: background-color 0.5s ease;
+    transition: all 0.4s ease;
 }
 
 #bg-canvas {
@@ -22,28 +28,17 @@ body {
     z-index: -1;
 }
 
-.material-symbols-outlined {
-    font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24
-}
-
 .glass-panel {
     background: var(--color-surface);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    transition: background 0.5s ease;
 }
 
-.glow-text {
-    text-shadow: 0 0 12px var(--color-primary);
-}
-
-.tech-tag-glow {
-    box-shadow: 0 0 15px var(--color-primary);
-    border: 1px solid var(--color-primary);
-}
-
+/* Dynamic Card Geometry */
 .card-hover {
+    max-width: var(--card-max-width);
+    padding: var(--card-padding);
     transition: all 0.4s cubic-bezier(0.2, 0, 0.2, 1);
 }
 
@@ -51,12 +46,10 @@ body {
     transform: translateY(-8px) scale(1.02);
     border-color: var(--color-primary);
     box-shadow: 0 10px 40px -10px var(--color-primary);
-    z-index: 20;
 }
 
-.entrance-delayed-1 { animation-delay: 0.1s; opacity: 0; }
-.entrance-delayed-2 { animation-delay: 0.2s; opacity: 0; }
-.entrance-delayed-3 { animation-delay: 0.3s; opacity: 0; }
-.entrance-delayed-4 { animation-delay: 0.4s; opacity: 0; }
-.entrance-delayed-5 { animation-delay: 0.5s; opacity: 0; }
-.entrance-delayed-6 { animation-delay: 0.6s; opacity: 0; }
+/* Dynamic Typography Headers */
+h2, h3 {
+    font-size: var(--font-size-heading);
+    text-shadow: 0 0 12px var(--color-primary);
+}
