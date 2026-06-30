@@ -48,7 +48,8 @@ async function loadDashboardData() {
     return;
   }
 
-  if (statusEl) statusEl.innerText = `ACTIVE SYSTEMS: ${courses.length} CHANNELS`;
+  // 🔴 UPDATED CUSTOM LABEL HERE
+  if (statusEl) statusEl.innerText = `LEARNING PATH: ${courses.length} COURSES`;
 
   // 3. Dynamically build each card structure using standard Tailwind layout classes
   courses.forEach((course) => {
