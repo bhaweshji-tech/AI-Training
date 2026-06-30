@@ -1,67 +1,92 @@
-// ✅ Supabase Config
-const SUPABASE_URL = "https://gsdblteofsongnjdjhpc.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_u9dNq32zPDAFOO415PArvQ_ljzEEiaC";
+import { auth, supabaseClient } from "./config.js";
+import { injectLayout } from "./auth.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-// Initialize Supabase Client
-const supabaseClient = window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_ANON_KEY
-);
+let globalUser = null;
 
-// Load data from Supabase
-async function loadData() {
-  const status = document.getElementById("status");
-  const cards = document.getElementById("cards");
+// Handle authentication lifecycle state changes
+onAuthStateChanged(auth, (user) => {
+  globalUser = user;
+  // Inject the custom component structures asynchronously
+  injectLayout(user);
+  // Fetch data records and render cards
+  loadDashboardData();
+});
 
-  status.innerText = "Loading data...";
-  cards.innerHTML = "";
+/**
+ * Fetches course data and user reviews from Supabase, then dynamically builds the UI 
+ * using the precise classes from the Stitch UI framework.
+ */
+async function loadDashboardData() {
+  const statusEl = document.getElementById("status");
+  const courseGrid = document.getElementById("courseGrid");
+  
+  if (!courseGrid) return;
+  courseGrid.innerHTML = "";
+  
+  if (statusEl) statusEl.innerText = "FETCHING NEURAL DATA RECORDS...";
 
-  const { data, error } = await supabaseClient
+  // 1. Fetch Dynamic Courses from Supabase trainingdata table
+  const { data: courses, error: courseErr } = await supabaseClient
     .from("trainingdata")
-    .select("*")
+    .select("id, title, desc, tech, link")
     .order("id", { ascending: true });
 
-  if (error) {
-    status.innerText = "Error: " + error.message;
+  // 2. Fetch associated Visitor Reviews
+  const { data: reviews, error: reviewErr } = await supabaseClient
+    .from("reviews")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (courseErr) {
+    if (statusEl) statusEl.innerText = "SYNC ERROR: " + courseErr.message;
+    return;
+  }
+  
+  if (!courses || courses.length === 0) {
+    if (statusEl) statusEl.innerText = "NO PROTOCOLS FOUND.";
     return;
   }
 
-  if (!data || data.length === 0) {
-    status.innerText = "No records found";
-    return;
-  }
+  if (statusEl) statusEl.innerText = `ACTIVE SYSTEMS: ${courses.length} CHANNELS`;
 
-  status.innerText = `Loaded ${data.length} records successfully`;
+  // 3. Dynamically build each card structure using Stitch design specifications
+  courses.forEach(course => {
+    const courseReviews = reviews ? reviews.filter(r => r.course_id === course.id) : [];
+    const cardElement = document.createElement("div");
+    
+    // Applying the high-fidelity glass-panel and hover mechanics from Stitch design
+    cardElement.className = "glass-panel rounded-2xl p-6 flex flex-col justify-between hover:scale-[1.02] transition-transform duration-300 group";
 
-  data.forEach(item => {
-    const div = document.createElement("div");
-    div.className = "bg-slate-900 border border-slate-800 p-6 rounded-2xl hover:border-blue-500 hover:shadow-xl hover:shadow-blue-950/20 transition-all duration-300 flex flex-col justify-between";
+    // Setup color badge variables based on standard tech strings for visual contrast
+    let techBadgeClass = "bg-violet-500/20 text-violet-400 border-violet-500/30";
+    const techLower = (course.tech || "").toLowerCase();
+    if (techLower.includes("supabase")) {
+        techBadgeClass = "bg-blue-500/20 text-blue-400 border-blue-500/30";
+    } else if (techLower.includes("ui") || techLower.includes("framework")) {
+        techBadgeClass = "bg-cyan-500/20 text-cyan-400 border-cyan-500/30";
+    } else if (techLower.includes("api") || techLower.includes("openai")) {
+        techBadgeClass = "bg-orange-500/20 text-orange-400 border-orange-500/30";
+    }
 
-    div.innerHTML = `
-      <div>
-        <span class="text-xs bg-blue-950 text-blue-400 border border-blue-800/50 px-3 py-1 rounded-full font-medium">
-          ${item.tech || "General"}
-        </span>
-
-        <h3 class="text-xl font-bold mt-4 text-slate-100">
-          ${item.title || "Untitled Project"}
-        </h3>
-
-        <p class="text-slate-400 mt-2 mb-6 text-sm leading-relaxed">
-          ${item.desc || "No description provided."}
-        </p>
+    // Process review items sub-elements layout markup
+    let reviewsHTML = courseReviews.map(r => `
+      <div class="bg-slate-900/60 p-3 rounded-xl border border-white/5 text-xs text-slate-300 mt-2">
+        <div class="flex items-center space-x-2 mb-1">
+          <img src="${r.user_photo || 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=150&h=150'}" class="w-4 h-4 rounded-full border border-violet-500/30">
+          <span class="font-bold text-slate-200">${r.user_name}</span>
+        </div>
+        <p class="italic text-slate-400">"${r.review_text}"</p>
       </div>
+    `).join("");
 
-      <a href="${item.link || "#"}" target="_blank"
-         class="text-sm text-blue-400 font-semibold hover:text-blue-300 flex items-center mt-auto group">
-        Visit Link 
-        <span class="transform group-hover:translate-x-1 transition-transform ml-1">→</span>
-      </a>
-    `;
-
-    cards.appendChild(div);
-  });
-}
-
-// Auto-load records when DOM is ready
-document.addEventListener("DOMContentLoaded", loadData);
+    // Populate full inner card schema mapping structural references cleanly
+    cardElement.innerHTML = `
+      <div>
+        <div class="flex justify-between items-start mb-4">
+          <span class="text-[10px] font-bold tracking-widest uppercase px-3 py-1 rounded-full border ${techBadgeClass}">
+            ${course.tech || "GENERAL"}
+          </span>
+          <a href="${course.link || "#"}" target="_blank" class="text-slate-500 hover:text-violet-400 transition" title="Visit Resource">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6
