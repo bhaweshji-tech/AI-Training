@@ -1,37 +1,37 @@
-<nav class="glass-panel border-b border-white/10 sticky top-0 z-40 px-lg py-md flex items-center justify-between">
-    <div class="flex items-center gap-md">
-        <div class="w-10 h-10 bg-primary-container rounded flex items-center justify-center text-white shadow-[0_0_20px_rgba(225,29,72,0.4)]">
+<nav class="glass-panel border-b border-white/10 sticky top-0 z-40 px-6 py-4 flex items-center justify-between">
+    <div class="flex items-center gap-4">
+        <div class="w-10 h-10 bg-rose-600 rounded flex items-center justify-center text-white shadow-[0_0_20px_rgba(225,29,72,0.4)] flex-shrink-0">
             <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">biotech</span>
         </div>
         <div>
-            <a href="index.html" class="font-headline-md text-headline-md font-bold glow-text tracking-tighter uppercase italic text-white block">AI Research Lab</a>
+            <a href="index.html" class="text-xl md:text-2xl font-bold glow-text tracking-tighter uppercase italic text-white block font-[Geist]">AI Research Lab</a>
         </div>
     </div>
     
-    <div class="hidden md:flex items-center gap-lg">
-        <a class="font-label-md text-primary font-bold hover:text-white transition-colors uppercase tracking-widest" href="index.html">Courses</a>
-        <a class="font-label-md text-on-surface hover:text-primary transition-colors uppercase tracking-widest" href="#">My Progress</a>
-        <a class="font-label-md text-on-surface hover:text-primary transition-colors uppercase tracking-widest" href="#">Certifications</a>
+    <div class="hidden md:flex items-center gap-6 mx-4">
+        <a class="text-xs font-bold font-[Geist] text-rose-400 hover:text-white transition-colors uppercase tracking-widest" href="index.html">Courses</a>
+        <a class="text-xs font-bold font-[Geist] text-slate-300 hover:text-rose-400 transition-colors uppercase tracking-widest" href="#">Progress</a>
+        <a class="text-xs font-bold font-[Geist] text-slate-300 hover:text-rose-400 transition-colors uppercase tracking-widest" href="#">Certifications</a>
     </div>
 
-    <div id="auth-zone" class="flex items-center gap-md">
+    <div id="auth-zone" class="flex items-center gap-4 flex-shrink-0">
         <div id="loggedOutArea" class="hidden">
-            <button id="btn-login" class="px-md py-sm bg-primary-container text-white font-label-md rounded flex items-center gap-xs uppercase tracking-widest font-bold transition-all hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(225,29,72,0.4)]">
-                <span class="material-symbols-outlined text-[18px]">login</span> Login with Google
+            <button id="btn-login" class="px-4 py-2 bg-rose-600 text-white text-xs font-bold font-[Geist] rounded flex items-center gap-2 uppercase tracking-widest transition-all hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(225,29,72,0.4)]">
+                <span class="material-symbols-outlined text-[18px]">login</span> Login
             </button>
         </div>
 
-        <div id="loggedInArea" class="hidden flex items-center gap-md">
-            <div class="hidden md:flex items-center mr-2">
-                <a id="dashboardLink" class="font-label-md text-primary font-bold hover:text-white transition-colors uppercase tracking-widest" href="#">Dashboard</a>
+        <div id="loggedInArea" class="hidden flex items-center gap-4">
+            <div class="hidden md:flex items-center">
+                <a id="dashboardLink" class="text-xs font-bold font-[Geist] text-rose-400 hover:text-white transition-colors uppercase tracking-widest" href="#">Dashboard</a>
             </div>
-            <div class="flex items-center gap-sm">
-                <div class="w-10 h-10 rounded-full border-2 border-primary-container overflow-hidden p-0.5 hover:scale-110 transition-transform shadow-[0_0_15px_rgba(225,29,72,0.3)]">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-full border-2 border-rose-600 overflow-hidden p-0.5 hover:scale-110 transition-transform shadow-[0_0_15px_rgba(225,29,72,0.3)]">
                     <img id="userPhoto" alt="User Profile" class="w-full h-full object-cover rounded-full" src="">
                 </div>
-                <span id="userName" class="text-sm font-medium text-slate-200 hidden lg:inline-block"></span>
+                <span id="userName" class="text-xs font-medium text-slate-200 hidden lg:inline-block font-[Inter]"></span>
             </div>
-            <button id="btn-logout" class="text-[10px] font-bold tracking-widest text-red-400 hover:text-red-300 uppercase transition border border-red-500/20 bg-red-500/10 px-3 py-1.5 rounded">
+            <button id="btn-logout" class="text-[10px] font-bold font-[Geist] tracking-widest text-red-400 hover:text-red-300 uppercase transition border border-red-500/20 bg-red-500/10 px-2.5 py-1.5 rounded">
                 Logout
             </button>
         </div>
