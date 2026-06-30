@@ -1,8 +1,16 @@
+:root {
+    /* Baseline fallback values in case connection lags */
+    --color-primary: #e11d48;
+    --color-background: #0b1326;
+    --color-surface: rgba(15, 23, 42, 0.4);
+}
+
 body {
     font-family: "Geist", "Inter", sans-serif;
-    background-color: #0b1326;
+    background-color: var(--color-background);
     color: #dae2fd;
     overflow-x: hidden;
+    transition: background-color 0.5s ease;
 }
 
 #bg-canvas {
@@ -19,19 +27,20 @@ body {
 }
 
 .glass-panel {
-    background: rgba(15, 23, 42, 0.4);
+    background: var(--color-surface);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
     border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: background 0.5s ease;
 }
 
 .glow-text {
-    text-shadow: 0 0 12px rgba(255, 179, 182, 0.4);
+    text-shadow: 0 0 12px var(--color-primary);
 }
 
 .tech-tag-glow {
-    box-shadow: 0 0 15px rgba(225, 29, 72, 0.5);
-    border: 1px solid rgba(225, 29, 72, 0.3);
+    box-shadow: 0 0 15px var(--color-primary);
+    border: 1px solid var(--color-primary);
 }
 
 .card-hover {
@@ -40,8 +49,8 @@ body {
 
 .card-hover:hover {
     transform: translateY(-8px) scale(1.02);
-    border-color: rgba(225, 29, 72, 0.4);
-    box-shadow: 0 10px 40px -10px rgba(225, 29, 72, 0.3);
+    border-color: var(--color-primary);
+    box-shadow: 0 10px 40px -10px var(--color-primary);
     z-index: 20;
 }
 
