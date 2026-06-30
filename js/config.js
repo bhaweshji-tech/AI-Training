@@ -24,3 +24,33 @@ const SUPABASE_ANON_KEY = "sb_publishable_u9dNq32zPDAFOO415PArvQ_ljzEEiaC";
 
 // Unified Supabase Client Initialization
 export const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+/**
+ * 🎨 AUTOMATIC THEME DISTRIBUTION ENGINE
+ * Fetches design tokens from your Supabase table and maps them to CSS custom variables.
+ */
+async function syncLiveThemeSettings() {
+  try {
+    const { data: settings, error } = await supabaseClient
+      .from("theme_settings")
+      .select("key, value");
+
+    if (error) {
+      console.warn("Theme synchronization offline, deploying fallbacks:", error.message);
+      return;
+    }
+
+    if (settings && settings.length > 0) {
+      const rootElement = document.documentElement;
+      settings.forEach(setting => {
+        // Dynamically inject variables directly into the browser window root
+        rootElement.style.setProperty(`--${setting.key}`, setting.value);
+      });
+    }
+  } catch (err) {
+    console.error("Critical fault executing style synchronization:", err);
+  }
+}
+
+// Fire theme updates immediately on script evaluation
+syncLiveThemeSettings();
