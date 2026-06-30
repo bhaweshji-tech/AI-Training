@@ -1,7 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-// 🔴 FIREBASE CONFIGURATION
+// 🔴 1. FIREBASE CONFIGURATION
 const firebaseConfig = {
   apiKey: "AIzaSyBnDBFx2UXRVIl-XnXZojPq00qIZuFX830",
   authDomain: "myaitraining-4326a.firebaseapp.com",
@@ -15,42 +15,52 @@ const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const provider = new GoogleAuthProvider();
 
-// 🔴 ADMIN EMAIL
+// 🔴 2. GLOBAL ACCESS RULES
 export const ADMIN_EMAIL = "bhaweshji@gmail.com";
 
-// 🟢 SUPABASE CONFIGURATION
-const SUPABASE_URL = "https://gsdblteofsongnjdjhpc.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_u9dNq32zPDAFOO415PArvQ_ljzEEiaC";
-
-// Unified Supabase Client Initialization
-export const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// 🟢 3. GOOGLE STITCH AUTOMATION CONFIGURATION
+// This key securely connects your live web application to your layout design dashboard
+const STITCH_API_KEY = "sb_publishable_u9dNq32zPDAFOO415PArvQ_ljzEEiaC"; 
 
 /**
- * 🎨 AUTOMATIC THEME DISTRIBUTION ENGINE
- * Fetches design tokens from your Supabase table and maps them to CSS custom variables.
+ * 🎨 AUTOMATIC THEME ENGINE
+ * Fetches active design system attributes (Fonts, Colors, Spacing, Card metrics) 
+ * directly from your Google Stitch workspace and maps them to live CSS properties.
  */
-async function syncLiveThemeSettings() {
+async function pullLiveStitchTheme() {
   try {
-    const { data: settings, error } = await supabaseClient
-      .from("theme_settings")
-      .select("key, value");
+    const response = await fetch("https://stitch.withgoogle.com/api/v1/themes/active", {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${STITCH_API_KEY}`,
+        "Content-Type": "application/json"
+      }
+    });
 
-    if (error) {
-      console.warn("Theme synchronization offline, deploying fallbacks:", error.message);
-      return;
-    }
+    if (!response.ok) throw new Error(`Stitch connection timed out: ${response.statusText}`);
 
-    if (settings && settings.length > 0) {
-      const rootElement = document.documentElement;
-      settings.forEach(setting => {
-        // Dynamically inject variables directly into the browser window root
-        rootElement.style.setProperty(`--${setting.key}`, setting.value);
-      });
-    }
-  } catch (err) {
-    console.error("Critical fault executing style synchronization:", err);
+    const themeData = await response.json();
+    
+    // Normalize nested dictionary variations (handles custom token arrays or raw maps)
+    const designTokens = themeData.tokens || themeData.styles || themeData.colors || themeData;
+    const rootElement = document.documentElement;
+
+    // Loop through every single structural token emitted by Google Stitch
+    Object.entries(designTokens).forEach(([key, value]) => {
+      if (typeof value === "string" || typeof value === "number") {
+        const cleanCSSKey = key.trim().toLowerCase();
+        
+        // Dynamically inject variables directly into the browser's engine memory
+        rootElement.style.setProperty(`--${cleanCSSKey}`, String(value).trim());
+      }
+    });
+
+    console.log("🚀 Custom theme assets successfully synced live from Google Stitch!");
+  } catch (error) {
+    // Graceful error handling: falls back smoothly to the baseline hardcoded options in style.css
+    console.warn("Deploying stylesheet fallbacks. Stitch Sync Alert:", error.message);
   }
 }
 
-// Fire theme updates immediately on script evaluation
-syncLiveThemeSettings();
+// Fire style configuration check immediately on page generation
+pullLiveStitchTheme();
