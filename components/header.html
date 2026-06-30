@@ -1,0 +1,33 @@
+<nav class="glass-panel sticky top-0 z-50 border-b border-white/10">
+    <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+            <div class="w-8 h-8 bg-violet-600 rounded-lg flex items-center justify-center neon-border">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                </svg>
+            </div>
+            <a href="index.html" class="text-xl font-bold tracking-tight glow-text uppercase">AI Research Lab</a>
+        </div>
+        
+        <div id="auth-zone" class="flex items-center space-x-4">
+            <div id="loggedOutArea" class="hidden">
+                <button id="btn-login" class="execute-gradient px-4 py-2 rounded-xl font-bold text-xs tracking-widest uppercase flex items-center space-x-2 transition-all">
+                    <span>Login with Google</span>
+                </button>
+            </div>
+
+            <div id="loggedInArea" class="hidden flex items-center space-x-4">
+                <div class="hidden md:flex items-center space-x-8 text-sm font-medium text-slate-300 mr-4">
+                    <a href="#" id="dashboardLink" class="text-violet-400 border-b-2 border-violet-400 pb-1 uppercase tracking-wider text-xs">Dashboard</a>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <img id="userPhoto" src="" class="w-8 h-8 rounded-full border border-violet-500/50" alt="User Profile">
+                    <span id="userName" class="text-sm font-medium text-slate-200 hidden sm:inline-block"></span>
+                </div>
+                <button id="btn-logout" class="text-[10px] font-black tracking-widest text-red-400 hover:text-red-300 uppercase transition border border-red-500/20 bg-red-500/10 px-3 py-1.5 rounded-lg">
+                    Logout
+                </button>
+            </div>
+        </div>
+    </div>
+</nav>
