@@ -58,6 +58,10 @@
     const rawInput = document.getElementById('stitch-box').value;
     if (!rawInput) return alert("Please paste the Stitch clipboard code first!");
 
+    // 1. Prompt for Admin Passcode to bypass RLS policies safely
+    const adminPassword = prompt("Authentication Required: Enter Admin Passcode to modify theme settings:");
+    if (!adminPassword) return; // Flow cancelled by user
+
     try {
       let tokens = {};
       
@@ -76,6 +80,7 @@
         });
       }
 
+      // 2. Generate regular configuration rows
       const upsertRows = Object.entries(tokens).map(([key, value]) => ({
         key: key.replace(/^--/, ''), // strip CSS dashes if present
         value: String(value)
@@ -83,15 +88,26 @@
 
       if (upsertRows.length === 0) throw new Error("No readable styling properties found.");
 
+      // 3. Inject the secret verification property row directly into this execution transaction block
+      // This will cause the RLS security policy rule we made to evaluate to TRUE!
+      upsertRows.push({
+        key: 'admin_auth_token',
+        value: adminPassword
+      });
+
       // Push everything to Supabase instantly
       const { error } = await supabaseClient.from('theme_settings').upsert(upsertRows, { onConflict: 'key' });
       if (error) throw error;
 
-      alert(`🚀 Success! ${upsertRows.length} design features applied. Refreshing page...`);
+      alert(`🚀 Success! ${upsertRows.length - 1} design features applied securely. Refreshing page...`);
       window.location.reload();
 
     } catch (err) {
-      alert("Execution error: " + err.message);
+      if (err.message.toLowerCase().includes("row-level security") || err.message.includes("violates")) {
+        alert("Access Denied: The passcode you entered is invalid or unauthorized.");
+      } else {
+        alert("Execution error: " + err.message);
+      }
     }
   });
 </script>    
