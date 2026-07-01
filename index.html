@@ -13,21 +13,28 @@
     
     <style id="dynamic-theme-overrides">
         body, html, main {
-            background-color: var(--background, var(--bg-color, #0d0e12)) !important;
-            color: var(--text-color, var(--foreground, #ffffff)) !important;
+            /* Maps Stitch's active background and typography configuration properties */
+            background-color: var(--background-color, #0d0e12) !important;
+            background-image: var(--background-image, none) !important;
+            font-family: var(--font-family, var(--fontfamily, sans-serif)) !important;
         }
 
-        .glass-panel {
-            background: var(--panel-bg, var(--card-bg, rgba(0, 0, 0, 0.3))) !important;
-            border-color: var(--border-color, var(--theme-color, rgba(255, 255, 255, 0.1))) !important;
+        /* Enforce color parameters over text blocks if passed down */
+        h2, h3, p, span, div {
+            color: var(--text-color, var(--foreground, inherit));
         }
 
-        .border-rose-600 {
-            border-color: var(--accent, var(--theme-color, #e11d48)) !important;
+        /* Proportional text structure sizing based on database layout definitions */
+        h2 {
+            font-size: var(--headline-xl, var(--headline-lg, 1.875rem)) !important;
         }
         
-        .bg-rose-600 {
-            background-color: var(--accent, var(--theme-color, #e11d48)) !important;
+        h3 {
+            font-size: var(--headline-md, 1.25rem) !important;
+        }
+
+        p {
+            font-size: var(--body-md, var(--body-lg, 0.875rem)) !important;
         }
     </style>
 </head>
@@ -67,13 +74,13 @@
 <script type="module">
   import { supabaseClient, ADMIN_EMAIL, auth } from './js/config.js';
 
-  // Core theme execution logic
+  // Core configuration delivery handler logic
   window.handleThemeSyncExecution = async () => {
     const rawInput = document.getElementById('stitch-box').value;
     if (!rawInput) return alert("Please paste the Stitch clipboard code first!");
 
     const adminPassword = prompt("Authentication Required: Enter Admin Passcode to apply theme alterations:");
-    if (!adminPassword) return; 
+    if (!adminPassword) return; // Action dropped by user
 
     try {
       let tokens = {};
@@ -81,6 +88,7 @@
       try {
         tokens = JSON.parse(rawInput);
       } catch (e) {
+        // Fallback layout iteration for raw CSS text lines
         rawInput.split('\n').forEach(line => {
           const parts = line.split(':');
           if (parts.length >= 2) {
@@ -95,7 +103,7 @@
       const valuesArray = [];
 
       Object.entries(tokens).forEach(([key, value]) => {
-        const cleanedKey = key.replace(/^--/, ''); 
+        const cleanedKey = key.replace(/^--/, ''); // Strip CSS variables markup prefixes
         if (cleanedKey) {
           keysArray.push(cleanedKey);
           valuesArray.push(String(value));
@@ -104,7 +112,7 @@
 
       if (keysArray.length === 0) throw new Error("No readable styling properties found.");
 
-      // Execute the RPC function directly
+      // Triggers database routine to bypass table policy conflicts
       const { data, error } = await supabaseClient.rpc('sync_stitch_theme', {
         admin_passcode: adminPassword,
         keys_array: keysArray,
@@ -125,13 +133,13 @@
     }
   };
 
-  // Explicitly bind the event listener inside the module scope once the button renders
+  // Bind the event listener to the element layout node inside module scope
   const syncBtn = document.getElementById('sync-btn');
   if (syncBtn) {
     syncBtn.addEventListener('click', window.handleThemeSyncExecution);
   }
 
-  // Setup panel visibility rules
+  // Monitor dashboard access authorization lifecycle
   auth.onAuthStateChanged((user) => {
     if (user && user.email === ADMIN_EMAIL) {
       document.getElementById('design-tunnel').style.display = 'block';
