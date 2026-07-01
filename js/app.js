@@ -10,7 +10,7 @@ onAuthStateChanged(auth, (user) => {
   // Inject the custom component structures asynchronously
   injectLayout(user);
   
-  // 1. Fetch and inject dynamic Stitch layout styling rows first
+  // 1. Fetch and inject dynamic Stitch layout styling rows first (Bypassing network caches)
   applyDynamicThemeSettings();
   
   // 2. Fetch data records and render cards
@@ -22,30 +22,35 @@ onAuthStateChanged(auth, (user) => {
  */
 async function applyDynamicThemeSettings() {
   try {
+    // Force a fresh network fetch by appending a dynamic cache control flag
     const { data: settings, error } = await supabaseClient
       .from("theme_settings")
-      .select("key, value");
+      .select("key, value")
+      .headers({ "cache-control": "no-cache, no-store, must-revalidate" });
 
     if (error) throw error;
     if (!settings || settings.length === 0) return;
 
     // Loop through every design property row stored in your database
     settings.forEach((setting) => {
-      // Ignore your security authentication token row
       if (setting.key === "admin_auth_token") return;
 
       // Rule A: Inject custom properties directly into document CSS variables
-      // Example: '--background-color: #0f172a'
       document.documentElement.style.setProperty(`--${setting.key}`, setting.value);
 
-      // Rule B: Backup method if Stitch targets specific element ID styles directly
+      // Rule B: Fallback mapping if keys match global layout elements directly
+      if (['background-color', 'background-image', 'font-family', 'color'].includes(setting.key)) {
+        document.body.style[setting.key] = setting.value;
+      }
+
+      // Rule C: Direct layout element ID injection mapping fallback
       const specificElement = document.getElementById(setting.key);
       if (specificElement) {
         specificElement.style.cssText = setting.value;
       }
     });
 
-    console.log(`🎨 Theme engine initialized: ${settings.length - 1} custom styles applied.`);
+    console.log(`🎨 Theme engine initialized: Cache bypassed. ${settings.length - 1} styles applied.`);
   } catch (err) {
     console.error("Theme Engine Loading Exception:", err.message);
   }
