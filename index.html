@@ -47,20 +47,14 @@
 <script type="module">
   import { supabaseClient, ADMIN_EMAIL, auth } from './js/config.js';
 
-  // Only show the sync panel if you are logged in as the admin
-  auth.onAuthStateChanged((user) => {
-    if (user && user.email === ADMIN_EMAIL) {
-      document.getElementById('design-tunnel').style.display = 'block';
-    }
-  });
-
-  document.getElementById('sync-btn').addEventListener('click', async () => {
+  // 1. Expose the execution logic to the global window scope so the HTML element can explicitly call it
+  window.handleThemeSyncExecution = async () => {
     const rawInput = document.getElementById('stitch-box').value;
     if (!rawInput) return alert("Please paste the Stitch clipboard code first!");
 
-    // 1. Prompt for Admin Passcode
+    // Prompt for Admin Passcode
     const adminPassword = prompt("Authentication Required: Enter Admin Passcode to apply theme alterations:");
-    if (!adminPassword) return; // Flow cancelled by user
+    if (!adminPassword) return; 
 
     try {
       let tokens = {};
@@ -69,7 +63,6 @@
       try {
         tokens = JSON.parse(rawInput);
       } catch (e) {
-        // Fallback for line-by-line token strings
         rawInput.split('\n').forEach(line => {
           const parts = line.split(':');
           if (parts.length >= 2) {
@@ -80,12 +73,11 @@
         });
       }
 
-      // 2. Separate keys and values into standalone arrays for our database function
       const keysArray = [];
       const valuesArray = [];
 
       Object.entries(tokens).forEach(([key, value]) => {
-        const cleanedKey = key.replace(/^--/, ''); // strip CSS dashes if present
+        const cleanedKey = key.replace(/^--/, ''); 
         if (cleanedKey) {
           keysArray.push(cleanedKey);
           valuesArray.push(String(value));
@@ -94,7 +86,7 @@
 
       if (keysArray.length === 0) throw new Error("No readable styling properties found.");
 
-      // 3. Trigger the RPC secure routine function bypassing standard public RLS completely
+      // Execute the database RPC securely
       const { data, error } = await supabaseClient.rpc('sync_stitch_theme', {
         admin_passcode: adminPassword,
         keys_array: keysArray,
@@ -107,14 +99,20 @@
       window.location.reload();
 
     } catch (err) {
-      // Clear checking fallback if the function returns an unauthorized rule exception
       if (err.message.includes("Unauthorized") || err.message.toLowerCase().includes("row-level security")) {
         alert("Access Denied: The passcode you entered is invalid.");
       } else {
         alert("Execution error: " + err.message);
       }
     }
+  };
+
+  // 2. Control dashboard panel visibility safely
+  auth.onAuthStateChanged((user) => {
+    if (user && user.email === ADMIN_EMAIL) {
+      document.getElementById('design-tunnel').style.display = 'block';
+    }
   });
-</script>    
+</script>
 </body>
 </html>
