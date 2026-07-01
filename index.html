@@ -41,20 +41,19 @@
 <div id="design-tunnel" style="position: fixed; bottom: 10px; right: 10px; z-index: 9999; background: #0f172a; padding: 15px; border: 1px solid #334155; border-radius: 8px; display: none;">
   <h4 style="color: #fff; margin: 0 0 8px 0; font-size: 12px;">Stitch Design Sync</h4>
   <textarea id="stitch-box" placeholder="Paste Stitch code here..." style="width: 200px; height: 60px; background: #1e293b; color: #fff; border: 1px solid #475569; font-size: 11px; border-radius: 4px; padding: 5px;"></textarea>
-  <button id="sync-btn" style="display: block; width: 100%; margin-top: 5px; background: #2563eb; color: #fff; border: none; padding: 5px; border-radius: 4px; cursor: pointer; font-size: 11px;">Update Website Theme</button>
+  <button id="sync-btn" onclick="window.handleThemeSyncExecution()" style="display: block; width: 100%; margin-top: 5px; background: #2563eb; color: #fff; border: none; padding: 5px; border-radius: 4px; cursor: pointer; font-size: 11px;">Update Website Theme</button>
 </div>
 
 <script type="module">
   import { supabaseClient, ADMIN_EMAIL, auth } from './js/config.js';
 
-  // 1. Expose the execution logic to the global window scope so the HTML element can explicitly call it
+  // Expose execution block globally to break module scoping boundaries
   window.handleThemeSyncExecution = async () => {
     const rawInput = document.getElementById('stitch-box').value;
     if (!rawInput) return alert("Please paste the Stitch clipboard code first!");
 
-    // Prompt for Admin Passcode
     const adminPassword = prompt("Authentication Required: Enter Admin Passcode to apply theme alterations:");
-    if (!adminPassword) return; 
+    if (!adminPassword) return; // Flow cancelled by user
 
     try {
       let tokens = {};
@@ -63,6 +62,7 @@
       try {
         tokens = JSON.parse(rawInput);
       } catch (e) {
+        // Fallback for line-by-line token strings
         rawInput.split('\n').forEach(line => {
           const parts = line.split(':');
           if (parts.length >= 2) {
@@ -77,7 +77,7 @@
       const valuesArray = [];
 
       Object.entries(tokens).forEach(([key, value]) => {
-        const cleanedKey = key.replace(/^--/, ''); 
+        const cleanedKey = key.replace(/^--/, ''); // strip CSS dashes if present
         if (cleanedKey) {
           keysArray.push(cleanedKey);
           valuesArray.push(String(value));
@@ -86,7 +86,7 @@
 
       if (keysArray.length === 0) throw new Error("No readable styling properties found.");
 
-      // Execute the database RPC securely
+      // Fire RPC function to securely update data bypasses public RLS policies safely
       const { data, error } = await supabaseClient.rpc('sync_stitch_theme', {
         admin_passcode: adminPassword,
         keys_array: keysArray,
@@ -107,12 +107,12 @@
     }
   };
 
-  // 2. Control dashboard panel visibility safely
+  // Setup view permissions for design interface based on user sign-in status
   auth.onAuthStateChanged((user) => {
     if (user && user.email === ADMIN_EMAIL) {
       document.getElementById('design-tunnel').style.display = 'block';
     }
   });
-</script>
+</script>    
 </body>
 </html>
