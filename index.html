@@ -12,29 +12,34 @@
     <link rel="stylesheet" href="css/style.css">
     
     <style id="dynamic-theme-overrides">
-        body, html, main {
-            /* Maps Stitch's active background and typography configuration properties */
+        /* Force root layouts to honor background properties */
+        body, html, main, #bg-canvas {
             background-color: var(--background-color, #0d0e12) !important;
             background-image: var(--background-image, none) !important;
             font-family: var(--font-family, var(--fontfamily, sans-serif)) !important;
         }
 
-        /* Enforce color parameters over text blocks if passed down */
-        h2, h3, p, span, div {
-            color: var(--text-color, var(--foreground, inherit));
+        /* Force your glass panels and training cards to adopt theme settings */
+        .glass-panel, #courseGrid > div, header {
+            background: var(--panel-bg, var(--card-bg, rgba(15, 23, 42, 0.4))) !important;
+            border-color: var(--border-color, var(--theme-color, rgba(255, 255, 255, 0.05))) !important;
+            backdrop-filter: blur(12px) !important;
         }
 
-        /* Proportional text structure sizing based on database layout definitions */
-        h2 {
-            font-size: var(--headline-xl, var(--headline-lg, 1.875rem)) !important;
+        /* Enforce custom primary accents over buttons and structural items */
+        .bg-rose-600 {
+            background-color: var(--accent-color, var(--theme-color, var(--accent, #e11d48))) !important;
         }
-        
-        h3 {
-            font-size: var(--headline-md, 1.25rem) !important;
+        .border-rose-600 {
+            border-color: var(--accent-color, var(--theme-color, var(--accent, #e11d48))) !important;
+        }
+        .text-rose-400 {
+            color: var(--accent-color, var(--theme-color, var(--accent, #fb7185))) !important;
         }
 
-        p {
-            font-size: var(--body-md, var(--body-lg, 0.875rem)) !important;
+        /* Handle general text color enforcement */
+        h2, h3, p, span {
+            color: var(--text-color, var(--foreground, #ffffff));
         }
     </style>
 </head>
@@ -80,7 +85,7 @@
     if (!rawInput) return alert("Please paste the Stitch clipboard code first!");
 
     const adminPassword = prompt("Authentication Required: Enter Admin Passcode to apply theme alterations:");
-    if (!adminPassword) return; // Action dropped by user
+    if (!adminPassword) return; 
 
     try {
       let tokens = {};
@@ -103,7 +108,7 @@
       const valuesArray = [];
 
       Object.entries(tokens).forEach(([key, value]) => {
-        const cleanedKey = key.replace(/^--/, ''); // Strip CSS variables markup prefixes
+        const cleanedKey = key.replace(/^--/, ''); 
         if (cleanedKey) {
           keysArray.push(cleanedKey);
           valuesArray.push(String(value));
