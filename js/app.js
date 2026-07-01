@@ -9,9 +9,47 @@ onAuthStateChanged(auth, (user) => {
   globalUser = user;
   // Inject the custom component structures asynchronously
   injectLayout(user);
-  // Fetch data records and render cards
+  
+  // 1. Fetch and inject dynamic Stitch layout styling rows first
+  applyDynamicThemeSettings();
+  
+  // 2. Fetch data records and render cards
   loadDashboardData();
 });
+
+/**
+ * Fetches design properties from 'theme_settings' table and applies them row-by-row
+ */
+async function applyDynamicThemeSettings() {
+  try {
+    const { data: settings, error } = await supabaseClient
+      .from("theme_settings")
+      .select("key, value");
+
+    if (error) throw error;
+    if (!settings || settings.length === 0) return;
+
+    // Loop through every design property row stored in your database
+    settings.forEach((setting) => {
+      // Ignore your security authentication token row
+      if (setting.key === "admin_auth_token") return;
+
+      // Rule A: Inject custom properties directly into document CSS variables
+      // Example: '--background-color: #0f172a'
+      document.documentElement.style.setProperty(`--${setting.key}`, setting.value);
+
+      // Rule B: Backup method if Stitch targets specific element ID styles directly
+      const specificElement = document.getElementById(setting.key);
+      if (specificElement) {
+        specificElement.style.cssText = setting.value;
+      }
+    });
+
+    console.log(`🎨 Theme engine initialized: ${settings.length - 1} custom styles applied.`);
+  } catch (err) {
+    console.error("Theme Engine Loading Exception:", err.message);
+  }
+}
 
 /**
  * Fetches course data and user reviews from Supabase, then dynamically builds the UI 
@@ -48,7 +86,6 @@ async function loadDashboardData() {
     return;
   }
 
-  // 🔴 UPDATED CUSTOM LABEL HERE
   if (statusEl) statusEl.innerText = `LEARNING PATH: ${courses.length} COURSES`;
 
   // 3. Dynamically build each card structure using standard Tailwind layout classes
@@ -56,10 +93,8 @@ async function loadDashboardData() {
     const courseReviews = reviews ? reviews.filter(r => r.course_id === course.id) : [];
     const cardElement = document.createElement("div");
     
-    // Using native Tailwind grid layouts and card-hover transitions from style.css
     cardElement.className = "glass-panel rounded-xl shadow-2xl flex flex-col overflow-hidden group cursor-pointer card-hover text-left";
 
-    // Process review items sub-elements layout markup
     let reviewsHTML = courseReviews.map(r => `
       <div class="bg-black/40 p-3 rounded border border-white/5 text-xs text-slate-300 mt-2">
         <div class="flex items-center space-x-2 mb-1">
@@ -70,7 +105,6 @@ async function loadDashboardData() {
       </div>
     `).join("");
 
-    // Populate full inner card schema mapping standard utility structures
     cardElement.innerHTML = `
       <div class="p-6 flex-grow flex flex-col">
         <div class="flex justify-between items-start mb-4">
