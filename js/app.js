@@ -35,22 +35,35 @@ async function applyDynamicThemeSettings() {
     settings.forEach((setting) => {
       if (setting.key === "admin_auth_token") return;
 
-      // Rule A: Inject custom properties directly into document CSS variables
-      document.documentElement.style.setProperty(`--${setting.key}`, setting.value);
+      let cleanValue = setting.value;
 
-      // Rule B: Fallback mapping if keys match global layout elements directly
-      if (['background-color', 'background-image', 'font-family', 'color'].includes(setting.key)) {
-        document.body.style[setting.key] = setting.value;
+      // Unpack Stitch array values like "[16px, { lineHeight: '24px' }]" if present
+      if (cleanValue.startsWith('[') && cleanValue.includes(',')) {
+        try {
+          // Extract the first clean element (like '16px') from the token string split
+          const match = cleanValue.match(/^\[['" ]?([^'",]+)/);
+          if (match && match[1]) cleanValue = match[1].trim();
+        } catch(e) { /* Fallback to raw string value if match fails */ }
       }
 
-      // Rule C: Direct layout element ID injection mapping fallback
-      const specificElement = document.getElementById(setting.key);
-      if (specificElement) {
-        specificElement.style.cssText = setting.value;
+      // 1. Inject variables into BOTH the root html element AND the active body tag properties scope
+      document.documentElement.style.setProperty(`--${setting.key}`, cleanValue);
+      document.body.style.setProperty(`--${setting.key}`, cleanValue);
+
+      // 2. Direct elemental fallback mapping injection assignment adjustments
+      if (['background-color', 'background-image', 'font-family', 'color'].includes(setting.key)) {
+        document.body.style[setting.key] = cleanValue;
+        
+        // CRITICAL SECURE BRIDGE FOR SHADER CANVAS: 
+        // If a custom background color or image is synced from Stitch, lower the visibility index of the WebGL canvas
+        if (setting.key === 'background-color' && cleanValue !== '#0c0805' && cleanValue !== '#0d0e12') {
+          const bgCanvas = document.getElementById('bg-canvas');
+          if (bgCanvas) bgCanvas.style.opacity = '0.15'; // Lowers particle intensity so your custom layout colors shine through
+        }
       }
     });
 
-    console.log(`🎨 Theme engine initialized: Cache bypassed. ${settings.length - 1} styles applied.`);
+    console.log(`🎨 Theme engine initialized: Live variables bound to active document body target lines.`);
   } catch (err) {
     console.error("Theme Engine Loading Exception:", err.message);
   }
