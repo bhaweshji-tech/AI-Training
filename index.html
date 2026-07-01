@@ -10,6 +10,26 @@
     <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
+    
+    <style id="dynamic-theme-overrides">
+        body, html, main {
+            background-color: var(--background, var(--bg-color, #0d0e12)) !important;
+            color: var(--text-color, var(--foreground, #ffffff)) !important;
+        }
+
+        .glass-panel {
+            background: var(--panel-bg, var(--card-bg, rgba(0, 0, 0, 0.3))) !important;
+            border-color: var(--border-color, var(--theme-color, rgba(255, 255, 255, 0.1))) !important;
+        }
+
+        .border-rose-600 {
+            border-color: var(--accent, var(--theme-color, #e11d48)) !important;
+        }
+        
+        .bg-rose-600 {
+            background-color: var(--accent, var(--theme-color, #e11d48)) !important;
+        }
+    </style>
 </head>
 <body class="flex flex-col min-h-screen selection:bg-rose-500 selection:text-white">
     
@@ -41,14 +61,14 @@
 <div id="design-tunnel" style="position: fixed; bottom: 10px; right: 10px; z-index: 9999; background: #0f172a; padding: 15px; border: 1px solid #334155; border-radius: 8px; display: none;">
   <h4 style="color: #fff; margin: 0 0 8px 0; font-size: 12px;">Stitch Design Sync</h4>
   <textarea id="stitch-box" placeholder="Paste Stitch code here..." style="width: 200px; height: 60px; background: #1e293b; color: #fff; border: 1px solid #475569; font-size: 11px; border-radius: 4px; padding: 5px;"></textarea>
-  <button id="sync-btn" style="display: block; width: 100%; margin-top: 5px; background: #2563eb; color: #fff; border: none; padding: 5px; border-radius: 4px; cursor: pointer; font-size: 11px;">Update Website Theme</button>
+  <button id="sync-btn" onclick="window.handleThemeSyncExecution()" style="display: block; width: 100%; margin-top: 5px; background: #2563eb; color: #fff; border: none; padding: 5px; border-radius: 4px; cursor: pointer; font-size: 11px;">Update Website Theme</button>
 </div>
 
 <script type="module">
   import { supabaseClient, ADMIN_EMAIL, auth } from './js/config.js';
 
-  // 1. Core theme execution logic
-  const handleThemeSyncExecution = async () => {
+  // Core theme execution logic
+  window.handleThemeSyncExecution = async () => {
     const rawInput = document.getElementById('stitch-box').value;
     if (!rawInput) return alert("Please paste the Stitch clipboard code first!");
 
@@ -105,13 +125,13 @@
     }
   };
 
-  // 2. Explicitly bind the event listener inside the module scope once the button renders
+  // Explicitly bind the event listener inside the module scope once the button renders
   const syncBtn = document.getElementById('sync-btn');
   if (syncBtn) {
-    syncBtn.addEventListener('click', handleThemeSyncExecution);
+    syncBtn.addEventListener('click', window.handleThemeSyncExecution);
   }
 
-  // 3. Setup panel visibility rules
+  // Setup panel visibility rules
   auth.onAuthStateChanged((user) => {
     if (user && user.email === ADMIN_EMAIL) {
       document.getElementById('design-tunnel').style.display = 'block';
